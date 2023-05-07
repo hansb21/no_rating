@@ -1,74 +1,126 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, field 
 import numpy as np
 import pandas as pd 
+#import re 
+from heapq import nlargest
+from operator import itemgetter
+
+
 
 @dataclass
 class usuario:
     """description"""
     id: int
-    lista_ator: list[tuple]
-    lista_genero: list[tuple]
+    lista_filmes: dict = field(default_factory=dict)
+    lista_10filmes: dict = field(default_factory=dict)
+    lista_ator: dict = field(default_factory=dict)
+    lista_10ator: dict = field(default_factory=dict)
+    lista_genero: dict = field(default_factory=dict)
+    lista_10genero: dict = field(default_factory=dict)
+    lista_diretor: dict = field(default_factory=dict)
+    lista_10diretores: dict = field(default_factory=dict)
+    lista_pais: dict = field(default_factory=dict)
+    lista_10pais: dict = field(default_factory=dict)
+    ano: int = 0000
     total_genero: int = 0
 
-df_topex = pd.read_csv('data/ratings.csv') 
-df_movies = pd.read_csv('data/movies.xls')
-#print(df_topex['item id'])
-user = dict()
+    def get_userMovies(self):
+        cols = ['userID', 'movieID', 'rating']
+        df_ratedmovies = pd.read_csv('data/user_ratedmovies.csv')
 
-def getWatched(userId):
-    filmes = {userId: list()}
-    for movie in df_topex['movieId'].where(df_topex['userId'] == userId).dropna():
-        filmes[userId].append(movie)
+        df = df_ratedmovies.loc[(df_ratedmovies['userID'] == self.id)]
+        
+        for movie in df['movieID']:
+           rating = df.loc[(df['movieID'] == movie)]
+           for rate in (rating['rating']):
+                    self.lista_filmes[movie] = rate
 
-    return filmes
-def getMovieGenre(movieId):
+        for movieid, score in nlargest(10, self.lista_filmes.items(), key=itemgetter(1)):
+           self.lista_10filmes[movieid] = score
 
-    genres = {movieId: list()}
-    movies = df_movies['genres'].where(df_movies['movieId'] == movieId).dropna()
-    for k in movies:
-        for genre in k.split("|"):
-            genres[movieId].append(genre) 
-            print(genres)
-                #print(filmes[i][j])
-    return genres 
-def getUserGenres(userId):
-    total = 0
-    userGenres = {userId: dict()}
-    filmes = getWatched((userId))
-    for movie in filmes[userId]:
-        genres = getMovieGenre(movie)
-        for genre in genres[movie]:
-            if genre not in userGenres[userId]:
-                total += 1
-                print(f" adicionou genero = {genre} ")
-                userGenres[userId][genre] = 1 
-            else:
-                userGenres[userId][genre] += 1 
 
-    return userGenres, total 
 
-#print(user[42])
-usergenre, total_genero = getUserGenres((42))
-norm = 0
-nota = 0
-rate = getMovieGenre((165)) #df_movies['genres'].where(df_movies['movieId'] == '110').dropna()
+    def get_top10Actors(self):
+        df_ratedactors = pd.read_csv('data/movie_actors.csv')
+        for movie in self.lista_filmes:
+            atores = df_ratedactors.loc[(df_ratedactors['movieID'] == movie)]
+            
+            for ator in atores['actorID']:
 
-for genres in usergenre[42].keys():
-    print(genres)
-    for rating in rate.values():
-        print(f"={rating}")
-        print(f"genres = {genres}")
-        print(nota)
-        if genres in rating:
-            print("estava em rating")
-            print(f"={usergenre[42][genres]}/{total_genero}")
-            norm += usergenre[42][genres]/total_genero
-            nota += usergenre[42][genres]/total_genero
-print(f"nota = {nota}")
-nota = nota / 2
-nota = nota * 4 
-print(f"nota = {nota}")
-nota += 1 
+                if ator not in self.lista_ator.keys():
+                    self.lista_ator[ator] = 1
+                    print(f"adicionou a lista {ator}")
+    
+                else: 
+                    self.lista_ator[ator] += 1
 
-print(f"nota = {nota}")
-print(f"norm = {norm}")
+        for actorid, score in nlargest(10, self.lista_ator.items(), key=itemgetter(1)):
+                   self.lista_10ator[actorid] = score
+        
+        print(self.lista_10ator)
+        return self.lista_10ator
+
+    def get_top10Genres(self):
+        df_ratedgenres = pd.read_csv('data/movie_genres.csv')
+        for movie in self.lista_filmes:
+            genres = df_ratedgenres.loc[(df_ratedgenres['movieID'] == movie)]
+            
+            for genre in genres['genre']:
+
+                if genre not in self.lista_genero.keys():
+                    self.lista_genero[genre] = 1
+    
+                else: 
+                    self.lista_genero[genre] += 1
+
+        for genre, score in nlargest(10, self.lista_genero.items(), key=itemgetter(1)):
+                   self.lista_10genero[genre] = score
+        
+        print(self.lista_10genero)
+        return self.lista_genero
+
+    def get_top10Directors(self):
+        df_rateddirectores = pd.read_csv('data/movie_directors.csv')
+        for movie in self.lista_filmes:
+            directores = df_rateddirectores.loc[(df_rateddirectores['movieID'] == movie)]
+            
+            for director in directores['directorID']:
+
+                if director not in self.lista_diretor.keys():
+                    self.lista_diretor[director] = 1
+    
+                else: 
+                    self.lista_diretor[director] += 1
+
+        for director, score in nlargest(10, self.lista_diretor.items(), key=itemgetter(1)):
+                   self.lista_10diretores[director] = score
+        print(self.lista_10diretores)
+        return self.lista_10diretores 
+    def get_top10Countries(self):
+        df_ratedcountries = pd.read_csv('data/movie_countries.csv')
+        for movie in self.lista_filmes:
+            countries = df_ratedcountries.loc[(df_ratedcountries['movieID'] == movie)]
+            
+            for country in countries['country']:
+
+                if country not in self.lista_pais.keys():
+                    self.lista_pais[country] = 1
+    
+                else: 
+                    self.lista_pais[country] += 1
+
+        for country, score in nlargest(10, self.lista_pais.items(), key=itemgetter(1)):
+                   self.lista_10pais[country] = score
+        print(self.lista_10pais)
+        return self.lista_10pais
+
+    def get_topYear(self):
+        return self.ano 
+
+user = usuario(id=int(input("entre id: ")))
+user.get_userMovies()
+#user.get_top10Actors()
+#user.get_top10Genres()
+#user.get_top10Directors()
+user.get_top10Countries()
+
