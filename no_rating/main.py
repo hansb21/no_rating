@@ -11,19 +11,28 @@ import math
 class usuario:
     """description"""
     id: int
-    lista_filmes: dict = field(default_factory=dict)
     lista_10filmes: dict = field(default_factory=dict)
-    lista_ator: dict = field(default_factory=dict)
     lista_10ator: dict = field(default_factory=dict)
-    lista_genero: dict = field(default_factory=dict)
     lista_10genero: dict = field(default_factory=dict)
-    lista_diretor: dict = field(default_factory=dict)
     lista_10diretores: dict = field(default_factory=dict)
-    lista_pais: dict = field(default_factory=dict)
     lista_10pais: dict = field(default_factory=dict)
+    
+    #!TODO remove this, turn into a local variable in every function
+    lista_filmes: dict = field(default_factory=dict)
+    lista_ator: dict = field(default_factory=dict)
+    lista_genero: dict = field(default_factory=dict)
+    lista_diretor: dict = field(default_factory=dict)
+    lista_pais: dict = field(default_factory=dict)
+    array_nota: dict = field(default_factory=dict)
 
     ano: int = 0000
     total_genero: int = 0
+    
+    df_ratedmovies = pd.read_csv('data/user_ratedmovies.csv')
+    df_ratedcountries = pd.read_csv('data/movie_countries.csv')
+    df_ratedactors = pd.read_csv('data/movie_actors.csv')
+    df_rateddirectores = pd.read_csv('data/movie_directors.csv')
+    df_ratedgenres = pd.read_csv('data/movie_genres.csv')
     
     def normalise(self, data):
         factor = 1.0 / math.fsum(data.values())
@@ -38,9 +47,8 @@ class usuario:
 
     def get_userMovies(self):
         cols = ['userID', 'movieID', 'rating']
-        df_ratedmovies = pd.read_csv('data/user_ratedmovies.csv')
 
-        df = df_ratedmovies.loc[(df_ratedmovies['userID'] == self.id)]
+        df = self.df_ratedmovies.loc[(self.df_ratedmovies['userID'] == self.id)]
         
         for movie in df['movieID']:
            rating = df.loc[(df['movieID'] == movie)]
@@ -50,15 +58,14 @@ class usuario:
         for movieid, score in nlargest(10, self.lista_filmes.items(), key=itemgetter(1)):
            self.lista_10filmes[movieid] = score
         
-        print(self.lista_10filmes)
+        #print(self.lista_10filmes)
         self.normalise(self.lista_10filmes)
-        print(self.lista_10filmes)
-        print(math.fsum(self.lista_10filmes.values()))
+        #print(self.lista_10filmes)
+        #print(math.fsum(self.lista_10filmes.values()))
 
     def get_top10Actors(self):
-        df_ratedactors = pd.read_csv('data/movie_actors.csv')
         for movie in self.lista_filmes:
-            atores = df_ratedactors.loc[(df_ratedactors['movieID'] == movie)]
+            atores = self.df_ratedactors.loc[(self.df_ratedactors['movieID'] == movie)]
             
             for ator in atores['actorID']:
 
@@ -72,16 +79,15 @@ class usuario:
         for actorid, score in nlargest(10, self.lista_ator.items(), key=itemgetter(1)):
                    self.lista_10ator[actorid] = score
         
-        print(self.lista_10ator)
+        #print(self.lista_10ator)
         self.normalise(self.lista_10ator)
-        print(self.lista_10ator)
-        print(math.fsum(self.lista_10ator.values()))
+        #print(self.lista_10ator)
+        #print(math.fsum(self.lista_10ator.values()))
         return self.lista_10ator
 
     def get_top10Genres(self):
-        df_ratedgenres = pd.read_csv('data/movie_genres.csv')
         for movie in self.lista_filmes:
-            genres = df_ratedgenres.loc[(df_ratedgenres['movieID'] == movie)]
+            genres = self.df_ratedgenres.loc[(self.df_ratedgenres['movieID'] == movie)]
             
             for genre in genres['genre']:
 
@@ -94,16 +100,15 @@ class usuario:
         for genre, score in nlargest(10, self.lista_genero.items(), key=itemgetter(1)):
                    self.lista_10genero[genre] = score
         
-        print(self.lista_10genero)
+        #print(self.lista_10genero)
         self.normalise(self.lista_10genero)
-        print(self.lista_10genero)
-        print(math.fsum(self.lista_10genero.values()))
+        #print(self.lista_10genero)
+        #print(math.fsum(self.lista_10genero.values()))
         return self.lista_genero
 
     def get_top10Directors(self):
-        df_rateddirectores = pd.read_csv('data/movie_directors.csv')
         for movie in self.lista_filmes:
-            directores = df_rateddirectores.loc[(df_rateddirectores['movieID'] == movie)]
+            directores = self.df_rateddirectores.loc[(self.df_rateddirectores['movieID'] == movie)]
             
             for director in directores['directorID']:
 
@@ -115,16 +120,15 @@ class usuario:
 
         for director, score in nlargest(10, self.lista_diretor.items(), key=itemgetter(1)):
                    self.lista_10diretores[director] = score
-        print(self.lista_10diretores)
+        #print(self.lista_10diretores)
         self.normalise(self.lista_10diretores)
-        print(self.lista_10diretores)
-        print(math.fsum(self.lista_10diretores.values()))
+        #print(self.lista_10diretores)
+        #print(math.fsum(self.lista_10diretores.values()))
         return self.lista_10diretores 
   
     def get_top10Countries(self):
-        df_ratedcountries = pd.read_csv('data/movie_countries.csv')
         for movie in self.lista_filmes:
-            countries = df_ratedcountries.loc[(df_ratedcountries['movieID'] == movie)]
+            countries = self.df_ratedcountries.loc[(self.df_ratedcountries['movieID'] == movie)]
             
             for country in countries['country']:
 
@@ -136,20 +140,52 @@ class usuario:
 
         for country, score in nlargest(10, self.lista_pais.items(), key=itemgetter(1)):
                    self.lista_10pais[country] = score
-        print(self.lista_10pais)
+       # print(self.lista_10pais)
         self.normalise(self.lista_10pais)
-        print(self.lista_10pais)
-        print(math.fsum(self.lista_10pais.values()))
+       # print(self.lista_10pais)
+       # print(math.fsum(self.lista_10pais.values()))
         return self.lista_10pais
 
     def get_topYear(self):
         return self.ano 
-
     
     def get_arrayuser(self):
         for movie in self.lista_filmes:
-            pass 
-        
+            self.array_nota[movie] = {}
+            genres = self.df_ratedgenres.loc[(self.df_ratedgenres['movieID'] == movie)] 
+            
+            self.array_nota[movie]['genre'] = 0
+            self.array_nota[movie]['actor'] = 0
+            self.array_nota[movie]['diretor'] = 0
+            self.array_nota[movie]['pais'] = 0
+            for genre in genres['genre']:
+                if genre in self.lista_10genero.keys():
+                    self.array_nota[movie]['genre'] += self.lista_10genero[genre]
+
+            atores = self.df_ratedactors.loc[(self.df_ratedactors['movieID'] == movie)]
+            
+            for ator in atores['actorID']:
+                if ator in self.lista_10ator.keys():
+                    self.array_nota[movie]['actor'] += self.lista_10ator[ator]
+
+            diretores = self.df_rateddirectores.loc[(self.df_rateddirectores['movieID'] == movie)]
+
+            for diretor in diretores['directorID']:
+                if diretor in self.lista_10diretores.keys():
+                    self.array_nota[movie]['diretor'] += self.lista_10diretores[diretor]
+
+            paises = self.df_ratedcountries.loc[(self.df_ratedcountries['movieID'] == movie)]
+
+            for pais in paises['country']:
+                if pais in self.lista_10pais.keys():
+                    self.array_nota[movie]['pais'] += self.lista_10pais[pais]
+
+        #print(self.array_nota)
+        for movie in self.array_nota.keys():
+            nota = 0
+            for keys in self.array_nota[movie].keys():
+                nota += self.array_nota[movie][keys]
+            print(f"nota filme = {nota} ")
      #  Para cada usuário gerar um array
      #  filme, notagenero, notaator, notadiretor, notapais
 
@@ -159,4 +195,5 @@ user.get_top10Actors()
 user.get_top10Genres()
 user.get_top10Directors()
 user.get_top10Countries()
+user.get_arrayuser()
 
