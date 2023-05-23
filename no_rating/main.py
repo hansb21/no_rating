@@ -10,12 +10,12 @@ from sklearn import preprocessing
 
 user = usuario(id=int(input("entre id: ")))
 
-x = np.arange(2).reshape(-1, 1)
-y = np.array([0.0784313, 0.51829268])
+tmpnota = [user.array_nota[movie]['nota'] for movie in user.array_nota.keys()]
+
+x = np.arange(len(tmpnota)).reshape(-1, 1)
+y = np.array(tmpnota)
 lab_encoder = preprocessing.LabelEncoder()
 train_y = lab_encoder.fit_transform(y)
-print(x)
-print(train_y)
 model = LogisticRegression(solver="liblinear", random_state=0).fit(x, train_y)
 print(model.classes_)
 print(model.predict_proba(x))

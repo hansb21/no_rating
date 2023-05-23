@@ -23,12 +23,7 @@ class usuario:
     lista_10diretores: dict = field(default_factory=dict)
     lista_10pais: dict = field(default_factory=dict)
 
-    #!TODO remove this, turn into a local variable in every function
     lista_filmes: dict = field(default_factory=dict)
-    lista_ator: dict = field(default_factory=dict)
-    lista_genero: dict = field(default_factory=dict)
-    lista_diretor: dict = field(default_factory=dict)
-    lista_pais: dict = field(default_factory=dict)
     array_nota: dict = field(default_factory=dict)
 
     ano: int = 0000
@@ -115,7 +110,7 @@ class usuario:
             self.lista_10genero[genre] = score
 
         self.normalise(self.lista_10genero)
-        return self.lista_genero
+        return self.lista_10genero
 
     def get_top10Directors(self):
         lista_diretor = dict()
@@ -162,7 +157,7 @@ class usuario:
             genres = self.df_ratedgenres.loc[(self.df_ratedgenres["movieID"] == movie)]
 
             self.array_nota[movie] = {}
-            for key in ["genre", "actor", "diretor", "pais"]:
+            for key in ["genre", "actor", "diretor", "pais", "nota"]:
                 self.array_nota[movie][key] = 0
 
             for genre in genres["genre"]:
@@ -191,11 +186,8 @@ class usuario:
 
         # print(self.array_nota)
         for movie in self.array_nota.keys():
-            nota = 0
-            for keys in self.array_nota[movie].keys():
-                nota += self.array_nota[movie][keys]
-            nota /= 4
-            print(f"nota filme {movie} = {nota} ")
+            self.array_nota[movie]["nota"] = self.array_nota[movie]["genre"] * 0.3 + self.array_nota[movie]["actor"] * 0.2
+            print(f"nota filme {movie} = {self.array_nota[movie]['nota']}")
             print(self.array_nota[movie])
 
     #  Para cada usuário gerar um array
